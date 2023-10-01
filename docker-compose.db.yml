@@ -1,0 +1,36 @@
+services:
+
+  # mongo-instance:
+  #   container_name: mongo-instance
+  #   image: mongo
+  #   restart: always
+  #   env_file:
+  #     - db.env
+  #   deploy:
+  #     resources:
+  #         limits:
+  #           memory: 128M
+  #         reservations:
+  #           memory: 128M
+
+  # mongo-express:
+  #   image: mongo-express
+  #   restart: always
+  #   ports:
+  #     - 8081:8081
+  #   env_file:
+  #     - db.env
+  postgres-instance:
+    container_name: postgres-instance
+    image: postgres:15-alpine
+    restart: always
+    ports:
+      - '5432:5432'
+    env_file:
+      - db.env
+    deploy:
+        resources:
+            limits:
+              memory: 128M
+            reservations:
+              memory: 128M
