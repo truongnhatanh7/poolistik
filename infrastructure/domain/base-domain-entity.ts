@@ -9,5 +9,5 @@ export default class BaseDomainEntity {
 
   updatedBy: string;
 
-  deleteAt: string;
+  deleteAt: Date;
 }

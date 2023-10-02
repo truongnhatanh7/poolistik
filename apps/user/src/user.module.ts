@@ -4,9 +4,15 @@ import { CustomConfigModule } from 'infrastructure/config/config.module';
 import { PostgresModule } from 'infrastructure/database/postgres.module';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserEntity } from './entities/user.entity';
 
 @Module({
-  imports: [CustomConfigModule, PostgresModule],
+  imports: [
+    CustomConfigModule,
+    PostgresModule,
+    TypeOrmModule.forFeature([UserEntity]),
+  ],
   controllers: [UserController],
   providers: [UserService, ConfigService],
 })
