@@ -1,34 +1,21 @@
-import BasePostgresDomainEntity from './postgres-base-domain-entity';
+import BaseDomainEntity from '../domain/base-domain-entity';
 import BasePostgresEntity from './postgres-base-entity';
 
 export abstract class PostgresDataMapper<
-  TDomainEntity extends BasePostgresDomainEntity<TDomainEntity>,
-  TOrmEntity extends BasePostgresEntity<TOrmEntity>,
+  T extends BaseDomainEntity,
+  R extends BasePostgresEntity,
 > {
-  abstract toOrmProps(
-    domainEntity: BasePostgresDomainEntity<TDomainEntity>,
-  ): BasePostgresEntity<TOrmEntity>;
+  abstract toOrmProps(domainEntity: T): R;
 
-  abstract toDomainProps(
-    ormEntity: BasePostgresEntity<TOrmEntity>,
-  ): BasePostgresDomainEntity<TDomainEntity>;
+  abstract toDomainProps(ormEntity: R): T;
 
-  toDomainEntity<T extends BasePostgresEntity<T>>(
-    ormEntity: BasePostgresEntity<T>,
-  ): BasePostgresDomainEntity<TDomainEntity> {
-    return {
-      id: ormEntity.id,
-      ...this.toDomainProps(ormEntity),
-    };
+  toDomainEntity(ormEntity: R): T {
+    const domainInstance: T = this.toDomainProps(ormEntity);
+    return domainInstance;
   }
 
-  toOrmEntity(
-    domainEntity: BasePostgresDomainEntity<TDomainEntity>,
-  ): BasePostgresEntity<TOrmEntity> {
-    const domainInstance = this.toOrmProps(domainEntity);
-    if (!domainInstance.id) {
-      domainInstance.id = domainEntity.id;
-    }
-    return domainInstance;
+  toOrmEntity(domainEntity: T): R {
+    const ormInstance: R = this.toOrmProps(domainEntity);
+    return ormInstance;
   }
 }

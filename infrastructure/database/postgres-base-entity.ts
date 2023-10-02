@@ -1,15 +1,8 @@
 import { BaseEntity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-export default class BasePostgresEntity<
-  T extends BasePostgresEntity<T>,
-> extends BaseEntity {
+export default class BasePostgresEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: string;
-
-  constructor(id: string) {
-    super();
-    this.id = id;
-  }
 
   @Column({ name: 'created_at' })
   createdAt: Date;

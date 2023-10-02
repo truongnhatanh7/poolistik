@@ -1,6 +1,6 @@
-import BasePostgresDomainEntity from 'infrastructure/database/postgres-base-domain-entity';
+import BaseDomainEntity from 'infrastructure/domain/base-domain-entity';
 
-export class UserDomain extends BasePostgresDomainEntity<UserDomain> {
+export class UserDomain extends BaseDomainEntity {
   username: string;
 
   password: string;

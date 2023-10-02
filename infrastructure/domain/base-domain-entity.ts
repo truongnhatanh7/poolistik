@@ -1,6 +1,4 @@
-export default class BasePostgresDomainEntity<
-  T extends BasePostgresDomainEntity<T>,
-> {
+export default class BaseDomainEntity {
   id: string;
 
   createdAt: Date;
