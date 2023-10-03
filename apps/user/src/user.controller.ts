@@ -1,13 +1,16 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
   Param,
+  Post,
   Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { PageOptionsDto } from 'infrastructure/libs/pagination/page-options.dto';
+import { SignUpDto } from './dto/sign-up.dto';
 
 @Controller()
 export class UserController {
@@ -23,5 +26,11 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   async findAll(@Query() pageOptionsDto: PageOptionsDto) {
     return await this.userService.findAll(pageOptionsDto);
+  }
+
+  @Post('/signUp')
+  @HttpCode(HttpStatus.OK)
+  async signUp(@Body() signUpDto: SignUpDto) {
+    return await this.userService.signUp(signUpDto);
   }
 }

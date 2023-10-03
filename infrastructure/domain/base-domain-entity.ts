@@ -1,13 +1,13 @@
 export default class BaseDomainEntity {
   id: string;
 
-  createdAt: Date;
+  createdAt?: Date;
 
-  updatedAt: Date;
+  updatedAt?: Date;
 
-  createdby: string;
+  createdby?: string;
 
-  updatedBy: string;
+  updatedBy?: string;
 
-  deleteAt: Date;
+  deleteAt?: Date;
 }

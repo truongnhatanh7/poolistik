@@ -6,6 +6,9 @@ import { PageMetaDto } from 'infrastructure/libs/pagination/page.meta';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { UserDataMapper } from './entities/user.mapper';
+import { UserDomain } from './entities/user.domain';
+import { SignUpDto } from './dto/sign-up.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -17,7 +20,7 @@ export class UserService {
     this.userDataMapper = new UserDataMapper();
   }
 
-  async find(id: string) {
+  async find(id: string): Promise<UserDomain> {
     const user: UserEntity = await this.userRepo.findOneBy({
       id: id,
     });
@@ -33,9 +36,25 @@ export class UserService {
 
     const itemCount = await queryBuilder.getCount();
     const { entities } = await queryBuilder.getRawAndEntities();
+    const resultEntities = entities.map((e) => {
+      return this.userDataMapper.toDomainEntity(e);
+    });
 
     const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
 
-    return new PageDto(entities, pageMetaDto);
+    return new PageDto(resultEntities, pageMetaDto);
+  }
+
+  async signUp(signUpDto: SignUpDto) {
+    const hashedPassword = await bcrypt.hash(signUpDto.password, 10);
+    const newUser = new UserDomain();
+    newUser.username = signUpDto.username;
+    newUser.password = hashedPassword;
+
+    const userEntity = this.userDataMapper.toOrmEntity(newUser);
+    console.log(userEntity);
+
+    await this.userRepo.save(userEntity);
+    // TODO: return jwt
   }
 }
