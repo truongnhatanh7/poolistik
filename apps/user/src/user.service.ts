@@ -9,6 +9,7 @@ import { UserDataMapper } from './entities/user.mapper';
 import { UserDomain } from './entities/user.domain';
 import { SignUpDto } from './dto/sign-up.dto';
 import * as bcrypt from 'bcrypt';
+import { SignInDto } from './dto/sign-in.dto';
 
 @Injectable()
 export class UserService {
@@ -52,9 +53,28 @@ export class UserService {
     newUser.password = hashedPassword;
 
     const userEntity = this.userDataMapper.toOrmEntity(newUser);
-    console.log(userEntity);
-
     await this.userRepo.save(userEntity);
     // TODO: return jwt
+  }
+
+  async signIn(signInDto: SignInDto) {
+    // Find user by user name
+    const user = await this.findByUsername(signInDto.username);
+    if (!user) {
+      throw new Error('invalid credentials');
+    }
+
+    const pwdCmp = await bcrypt.compare(signInDto.password, user.password);
+    if (!pwdCmp) {
+      throw new Error('invalid credentials');
+    }
+
+    // TODO: return jwt
+  }
+
+  private async findByUsername(username: string) {
+    return this.userRepo.findOneBy({
+      username: username,
+    });
   }
 }

@@ -11,6 +11,7 @@ import {
 import { UserService } from './user.service';
 import { PageOptionsDto } from 'infrastructure/libs/pagination/page-options.dto';
 import { SignUpDto } from './dto/sign-up.dto';
+import { SignInDto } from './dto/sign-in.dto';
 
 @Controller()
 export class UserController {
@@ -32,5 +33,11 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   async signUp(@Body() signUpDto: SignUpDto) {
     return await this.userService.signUp(signUpDto);
+  }
+
+  @Post('/signIn')
+  @HttpCode(HttpStatus.OK)
+  async signIn(@Body() signInDto: SignInDto) {
+    return await this.userService.signIn(signInDto);
   }
 }
