@@ -4,12 +4,10 @@ import { PageOptionsDto } from 'infrastructure/libs/pagination/page-options.dto'
 import { PageDto } from 'infrastructure/libs/pagination/page.dto';
 import { PageMetaDto } from 'infrastructure/libs/pagination/page.meta';
 import { Repository } from 'typeorm';
+import { UpdateUserDto } from './dto/update.dto';
+import { UserDomain } from './entities/user.domain';
 import { UserEntity } from './entities/user.entity';
 import { UserDataMapper } from './entities/user.mapper';
-import { UserDomain } from './entities/user.domain';
-import { SignUpDto } from './dto/sign-up.dto';
-import * as bcrypt from 'bcrypt';
-import { SignInDto } from './dto/sign-in.dto';
 
 @Injectable()
 export class UserService {
@@ -46,35 +44,17 @@ export class UserService {
     return new PageDto(resultEntities, pageMetaDto);
   }
 
-  async signUp(signUpDto: SignUpDto) {
-    const hashedPassword = await bcrypt.hash(signUpDto.password, 10);
-    const newUser = new UserDomain();
-    newUser.username = signUpDto.username;
-    newUser.password = hashedPassword;
-
-    const userEntity = this.userDataMapper.toOrmEntity(newUser);
-    await this.userRepo.save(userEntity);
-    // TODO: return jwt
-  }
-
-  async signIn(signInDto: SignInDto) {
-    // Find user by user name
-    const user = await this.findByUsername(signInDto.username);
-    if (!user) {
-      throw new Error('invalid credentials');
-    }
-
-    const pwdCmp = await bcrypt.compare(signInDto.password, user.password);
-    if (!pwdCmp) {
-      throw new Error('invalid credentials');
-    }
-
-    // TODO: return jwt
-  }
-
-  private async findByUsername(username: string) {
-    return this.userRepo.findOneBy({
-      username: username,
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.userRepo.findOneBy({
+      id: id,
     });
+    if (!user) throw new Error('Invalid credentials');
+
+    Object.keys(updateUserDto).forEach((key) => {
+      user[key] = updateUserDto[key];
+    });
+
+    await this.userRepo.save(user);
+    return user;
   }
 }

@@ -6,7 +6,7 @@ import userConfig from 'apps/user/src/cfg/user.config';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['db.env', '.env'],
+      envFilePath: ['.env'],
       load: [userConfig],
     }),
   ],

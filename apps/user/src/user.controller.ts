@@ -5,13 +5,12 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  Post,
+  Put,
   Query,
 } from '@nestjs/common';
-import { UserService } from './user.service';
 import { PageOptionsDto } from 'infrastructure/libs/pagination/page-options.dto';
-import { SignUpDto } from './dto/sign-up.dto';
-import { SignInDto } from './dto/sign-in.dto';
+import { UpdateUserDto } from './dto/update.dto';
+import { UserService } from './user.service';
 
 @Controller()
 export class UserController {
@@ -29,15 +28,9 @@ export class UserController {
     return await this.userService.findAll(pageOptionsDto);
   }
 
-  @Post('/signUp')
+  @Put('/update/:id')
   @HttpCode(HttpStatus.OK)
-  async signUp(@Body() signUpDto: SignUpDto) {
-    return await this.userService.signUp(signUpDto);
-  }
-
-  @Post('/signIn')
-  @HttpCode(HttpStatus.OK)
-  async signIn(@Body() signInDto: SignInDto) {
-    return await this.userService.signIn(signInDto);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return await this.userService.update(id, updateUserDto);
   }
 }
