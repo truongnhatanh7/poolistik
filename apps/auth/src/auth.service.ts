@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { UserEntity } from 'apps/user/src/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { UserDomain } from 'apps/user/src/entities/user.domain';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +15,7 @@ export class AuthService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    private jwtService: JwtService,
   ) {
     this.userDataMapper = new UserDataMapper();
   }
@@ -28,7 +30,7 @@ export class AuthService {
     // TODO: return jwt
   }
 
-  async signIn(signInDto: SignInDto) {
+  async signIn(req: Request, signInDto: SignInDto) {
     // Find user by user name
     const user = await this.findByUsername(signInDto.username);
     if (!user) {
@@ -40,14 +42,43 @@ export class AuthService {
       throw new HttpException('BadRequest', HttpStatus.BAD_REQUEST);
     }
 
+    const sessionToken = req.headers['user-agent'];
+    if (!sessionToken) {
+      throw new HttpException('BadRequest', HttpStatus.BAD_REQUEST);
+    }
+    const hashSessionToken = await bcrypt.hash(sessionToken, 10);
+
     // Check login failed count
 
     // Generate token pair: refresh token and access token
-
+    const returnTokens = this.generateToken(
+      hashSessionToken,
+      user.id,
+      signInDto.username,
+    );
     // Save generated token to db
 
     // return token
-    return 'yasuo';
+    return returnTokens;
+  }
+
+  private async generateToken(ua: string, userId: string, username: string) {
+    const userPayload = {
+      userId: userId,
+      username: username,
+      sessionToken: ua,
+    };
+
+    // TODO: refactor to DTO, add expire time
+
+    const accessToken = await this.jwtService.signAsync(userPayload);
+    const refreshToken = await this.jwtService.signAsync({
+      userId: userId,
+    });
+    return {
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    };
   }
 
   private async findByUsername(username: string) {
