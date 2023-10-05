@@ -12,7 +12,7 @@ import { PageOptionsDto } from 'infrastructure/libs/pagination/page-options.dto'
 import { UpdateUserDto } from './dto/update.dto';
 import { UserService } from './user.service';
 
-@Controller()
+@Controller('/api')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
