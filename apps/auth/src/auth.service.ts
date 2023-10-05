@@ -10,12 +10,12 @@ import { UserDataMapper } from 'apps/user/src/entities/user.mapper';
 import * as bcrypt from 'bcrypt';
 import { catchError, lastValueFrom } from 'rxjs';
 import { Repository } from 'typeorm';
-import { AccessTokenDto } from './dto/access-token.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { ReturnToken } from './dto/return-token.dto';
+import { AccessTokenDto } from '../../../infrastructure/auth/dto/access-token.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { AxiosError } from 'axios';
+import { ReturnToken } from 'infrastructure/auth/dto/return-token.dto';
+import { RefreshTokenDto } from 'infrastructure/auth/dto/refresh-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -62,6 +62,7 @@ export class AuthService {
     // Check login failed count
     if (user.failedLoginCount > 5) {
       // TODO: Handle block account
+      throw new HttpException('BadRequest', HttpStatus.UNAUTHORIZED);
     }
 
     // Generate token pair: refresh token and access token
@@ -77,7 +78,7 @@ export class AuthService {
   }
 
   private async generateToken(
-    ua: string,
+    hashSessionToken: string,
     userId: string,
     username: string,
   ): Promise<ReturnToken> {
@@ -86,7 +87,7 @@ export class AuthService {
         userId: userId,
         username: username,
       },
-      sessionToken: ua,
+      sessionToken: hashSessionToken,
       expiredAt: new Date(new Date().getTime() + 360000), // 1 hour
     };
 
@@ -95,7 +96,7 @@ export class AuthService {
         userId: userId,
         username: username,
       },
-      sessionToken: ua,
+      sessionToken: hashSessionToken,
       expiredAt: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
     };
 
@@ -135,5 +136,27 @@ export class AuthService {
 
   healthCheck() {
     return true;
+  }
+
+  async handleRefreshToken(req: Request) {
+    // Generate token pair: refresh token and access token
+    const payload: AccessTokenDto = JSON.parse(req['user']);
+    if (!payload || payload === undefined || payload === null) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
+
+    const returnTokens = await this.generateToken(
+      payload.sessionToken,
+      payload.payload?.userId,
+      payload.payload?.username,
+    );
+
+    // Save session token to db
+    await this.persistSessionToken(
+      payload.payload?.userId,
+      payload.sessionToken,
+    );
+    // return token
+    return returnTokens;
   }
 }

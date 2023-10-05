@@ -19,8 +19,13 @@ export class AuthController {
     return await this.authService.signUp(signUpDto);
   }
 
-  @Post('refresh-token')
-  async refreshToken() {}
+  @Post('/refresh-token')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  async refreshToken(@Req() req: Request) {
+    console.log('Refresh');
+    return await this.authService.handleRefreshToken(req);
+  }
 
   @Post('/sign-out')
   async signOut() {}

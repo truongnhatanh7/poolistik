@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { AccessTokenDto } from '../../../apps/auth/src/dto/access-token.dto';
+import { AccessTokenDto } from '../dto/access-token.dto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { UserDomain } from 'apps/user/src/entities/user.domain';
@@ -35,7 +35,7 @@ export class AuthGuard implements CanActivate {
       await this.verifySessionToken(payload);
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers
-      request['user'] = payload;
+      request['user'] = JSON.stringify(payload);
     } catch {
       throw new UnauthorizedException();
     }
