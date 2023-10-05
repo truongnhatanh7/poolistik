@@ -32,7 +32,7 @@ export class AuthGuard implements CanActivate {
       });
 
       this.verifyExpiredToken(payload);
-      // await this.verifySessionToken(payload);
+      await this.verifySessionToken(payload);
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers
       request['user'] = payload;
@@ -55,23 +55,22 @@ export class AuthGuard implements CanActivate {
   }
 
   private async verifySessionToken(payload: AccessTokenDto) {
-    if (!payload.payload.userId) {
+    if (!payload.payload.hasOwnProperty('userId')) {
       throw new UnauthorizedException();
     }
     const userId: string = payload.payload.userId;
     const sessionToken = payload.sessionToken;
-    const host = this.configService.get<string>('HOST_NAME');
-    const userServicePort = this.configService.get<string>('USER_SERVICE_PORT');
-    const getUserApi = host + ':' + userServicePort + '/api/find/' + userId;
 
-    const res = await lastValueFrom(this.httpService.get(getUserApi));
+    const getUserApi = `${this.configService.get<string>(
+      'USER_SERVICE_ENDPOINT',
+    )}/api/find/${userId}`;
 
-    if (!(res instanceof UserDomain)) {
-      throw new UnauthorizedException();
-    }
-
-    if ((res as UserDomain).sessionToken !== sessionToken) {
-      throw new UnauthorizedException();
-    }
+    await lastValueFrom(this.httpService.get<UserDomain>(getUserApi)).then(
+      (data) => {
+        if (data.data.sessionToken !== sessionToken) {
+          throw new UnauthorizedException();
+        }
+      },
+    );
   }
 }

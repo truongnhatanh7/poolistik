@@ -116,13 +116,12 @@ export class AuthService {
   }
 
   private async persistSessionToken(userId: string, sessionToken: string) {
-    const host = this.configService.get<string>('HOST_NAME');
-    const userServicePort = this.configService.get<string>('USER_SERVICE_PORT');
-    const updateUserApi =
-      host + ':' + userServicePort + '/api/update/' + userId;
+    const updateUserApi = `${this.configService.get<string>(
+      'USER_SERVICE_ENDPOINT',
+    )}/api/update/${userId}`;
+
     const updatePayload: UpdateUserDto = new UpdateUserDto();
     updatePayload.sessionToken = sessionToken;
-    console.log(updateUserApi);
 
     const res = await lastValueFrom(
       this.httpService.put(updateUserApi, updatePayload).pipe(

@@ -57,4 +57,8 @@ export class UserService {
     await this.userRepo.save(user);
     return user;
   }
+
+  healthCheck() {
+    return true;
+  }
 }

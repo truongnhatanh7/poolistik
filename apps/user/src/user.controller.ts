@@ -33,4 +33,9 @@ export class UserController {
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return await this.userService.update(id, updateUserDto);
   }
+
+  @Get('/healthcheck')
+  healthCheck() {
+    return this.userService.healthCheck();
+  }
 }
