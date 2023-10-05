@@ -1,7 +1,9 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from 'infrastructure/auth/guard/auth.guard';
 
 @Controller('/api')
 export class AuthController {
@@ -22,4 +24,16 @@ export class AuthController {
 
   @Post('/sign-out')
   async signOut() {}
+
+  @Get('/heathcheck')
+  healthCheck() {
+    return this.authService.healthCheck();
+  }
+
+  @Get('/guard-test')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  guardTest() {
+    return true;
+  }
 }

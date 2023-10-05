@@ -133,4 +133,8 @@ export class AuthService {
     );
     return res;
   }
+
+  healthCheck() {
+    return true;
+  }
 }

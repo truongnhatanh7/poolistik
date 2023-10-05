@@ -6,6 +6,7 @@ export function swaggerConfiguration(app: INestApplication<any>, name: string) {
     .setTitle(name)
     .setDescription('')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

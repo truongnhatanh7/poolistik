@@ -10,7 +10,6 @@ import { CustomConfigModule } from 'infrastructure/config/config.module';
         return {
           global: true,
           secret: configService.get<string>('JWT_SECRET'),
-          signOptions: { expiresIn: '60s' },
         };
       },
 
