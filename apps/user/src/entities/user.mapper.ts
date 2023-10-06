@@ -11,6 +11,7 @@ export class UserDataMapper extends PostgresDataMapper<UserDomain, UserEntity> {
     const userDomainInstance = new UserDomain();
     userDomainInstance.id = ormEntity.id;
     userDomainInstance.username = ormEntity.username;
+    userDomainInstance.role = ormEntity.role;
     userDomainInstance.password = ormEntity.password;
     userDomainInstance.createdAt = ormEntity.createdAt;
     userDomainInstance.createdby = ormEntity.createdby;
@@ -28,6 +29,7 @@ export class UserDataMapper extends PostgresDataMapper<UserDomain, UserEntity> {
     userOrmInstance.id = domainEntity.id;
     userOrmInstance.username = domainEntity.username;
     userOrmInstance.password = domainEntity.password;
+    userOrmInstance.role = domainEntity.role;
     userOrmInstance.createdAt = domainEntity.createdAt;
     userOrmInstance.createdby = domainEntity.createdby;
     userOrmInstance.updatedAt = domainEntity.updatedAt;

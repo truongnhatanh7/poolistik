@@ -16,6 +16,7 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { AxiosError } from 'axios';
 import { ReturnToken } from 'infrastructure/auth/dto/return-token.dto';
 import { RefreshTokenDto } from 'infrastructure/auth/dto/refresh-token.dto';
+import { UserRole } from 'infrastructure/auth/role/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +35,7 @@ export class AuthService {
     const newUser = new UserDomain();
     newUser.username = signUpDto.username;
     newUser.password = hashedPassword;
+    newUser.role = UserRole.User;
 
     const userEntity = this.userDataMapper.toOrmEntity(newUser);
     await this.userRepo.save(userEntity);
@@ -70,6 +72,7 @@ export class AuthService {
       hashSessionToken,
       user.id,
       signInDto.username,
+      user.role,
     );
     // Save session token to db
     await this.persistSessionToken(user.id, hashSessionToken);
@@ -81,11 +84,13 @@ export class AuthService {
     hashSessionToken: string,
     userId: string,
     username: string,
+    role: UserRole,
   ): Promise<ReturnToken> {
     const accessTokenPayload: AccessTokenDto = {
       payload: {
         userId: userId,
         username: username,
+        role: role,
       },
       sessionToken: hashSessionToken,
       expiredAt: new Date(new Date().getTime() + 360000), // 1 hour
@@ -95,6 +100,7 @@ export class AuthService {
       payload: {
         userId: userId,
         username: username,
+        role: role,
       },
       sessionToken: hashSessionToken,
       expiredAt: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
@@ -149,6 +155,7 @@ export class AuthService {
       payload.sessionToken,
       payload.payload?.userId,
       payload.payload?.username,
+      payload.payload?.role,
     );
 
     // Save session token to db

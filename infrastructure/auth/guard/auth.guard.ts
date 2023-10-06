@@ -11,6 +11,9 @@ import { AccessTokenDto } from '../dto/access-token.dto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { UserDomain } from 'apps/user/src/entities/user.domain';
+import { Reflector } from '@nestjs/core';
+import { UserRole } from '../role/role.enum';
+import { ROLES_KEY } from '../decorators/role.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -18,6 +21,7 @@ export class AuthGuard implements CanActivate {
     private configService: ConfigService,
     private jwtService: JwtService,
     private httpService: HttpService,
+    private reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -33,6 +37,7 @@ export class AuthGuard implements CanActivate {
 
       this.verifyExpiredToken(payload);
       await this.verifySessionToken(payload);
+      this.verifyRole(payload, context);
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers
       request['user'] = JSON.stringify(payload);
@@ -50,6 +55,29 @@ export class AuthGuard implements CanActivate {
   private verifyExpiredToken(payload: AccessTokenDto) {
     const expiredDate = new Date(payload.expiredAt);
     if (new Date() > expiredDate) {
+      throw new UnauthorizedException();
+    }
+  }
+
+  private verifyRole(payload: AccessTokenDto, context: ExecutionContext) {
+    if (!payload.payload.hasOwnProperty('userId')) {
+      throw new UnauthorizedException();
+    }
+
+    const requiredRoles = this.reflector.getAllAndOverride<UserRole>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
+    if (!requiredRoles) {
+      return;
+    }
+
+    if (!payload.payload.hasOwnProperty('role')) {
+      throw new UnauthorizedException();
+    }
+
+    if (payload.payload.role != requiredRoles) {
       throw new UnauthorizedException();
     }
   }

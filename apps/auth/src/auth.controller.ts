@@ -4,6 +4,8 @@ import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from 'infrastructure/auth/guard/auth.guard';
+import { Roles } from 'infrastructure/auth/decorators/role.decorator';
+import { UserRole } from 'infrastructure/auth/role/role.enum';
 
 @Controller('/api')
 export class AuthController {
@@ -23,7 +25,6 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   async refreshToken(@Req() req: Request) {
-    console.log('Refresh');
     return await this.authService.handleRefreshToken(req);
   }
 
@@ -37,6 +38,7 @@ export class AuthController {
 
   @Get('/guard-test')
   @ApiBearerAuth()
+  @Roles(UserRole.Admin)
   @UseGuards(AuthGuard)
   guardTest() {
     return true;

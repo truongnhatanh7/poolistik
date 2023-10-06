@@ -1,3 +1,4 @@
+import { UserRole } from 'infrastructure/auth/role/role.enum';
 import BasePostgresEntity from 'infrastructure/database/postgres-base-entity';
 import { Column, Entity } from 'typeorm';
 
@@ -8,6 +9,14 @@ export class UserEntity extends BasePostgresEntity {
 
   @Column({ name: 'password' })
   password: string;
+
+  @Column({
+    type: 'enum',
+    name: 'role',
+    enum: UserRole,
+    default: UserRole.User,
+  })
+  role: UserRole;
 
   @Column({
     name: 'session_token',
