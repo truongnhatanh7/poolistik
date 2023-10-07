@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PageOptionsDto } from 'infrastructure/libs/pagination/page-options.dto';
 import { PageDto } from 'infrastructure/libs/pagination/page.dto';
@@ -23,6 +23,9 @@ export class UserService {
     const user: UserEntity = await this.userRepo.findOneBy({
       id: id,
     });
+    if (user.deleteAt) {
+      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+    }
     return this.userDataMapper.toDomainEntity(user);
   }
 
@@ -31,9 +34,10 @@ export class UserService {
     queryBuilder
       .orderBy('user.created_at', pageOptionsDto.order)
       .skip(PageOptionsDto.getSkip(pageOptionsDto.page, pageOptionsDto.take))
-      .take(pageOptionsDto.take);
+      .take(pageOptionsDto.take)
+      .where('user.delete_at IS NULL');
 
-    const itemCount = await queryBuilder.getCount();
+    const itemCount = await queryBuilder.getCount(); // This could affect the performance
     const { entities } = await queryBuilder.getRawAndEntities();
     const resultEntities = entities.map((e) => {
       return this.userDataMapper.toDomainEntity(e);
@@ -56,6 +60,21 @@ export class UserService {
 
     await this.userRepo.save(user);
     return user;
+  }
+
+  async delete(id: string) {
+    const user = await this.userRepo.findOneBy({
+      id: id,
+    });
+
+    user.deleteAt = new Date();
+    await this.userRepo.save(user);
+  }
+
+  async truncate(id: string) {
+    await this.userRepo.delete({
+      id: id,
+    });
   }
 
   healthCheck() {

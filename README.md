@@ -12,9 +12,10 @@ NestJS
 - Config Boilerplate
 - Pagination Boilerplate: implement using Offset/Limit technique.
 - CRUD User
-## TODO
 - Payload validation using pipe
+## TODO
 - Reset password by email
 - CRUD Poolhall
+- ElasticCache for session token -> Reduce latency
 - Implement pool table booking
 - Implement Kafka Boilerplate

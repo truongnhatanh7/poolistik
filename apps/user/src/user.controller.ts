@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -35,7 +36,20 @@ export class UserController {
     return await this.userService.update(id, updateUserDto);
   }
 
+  @Delete('/delete/:id')
+  @HttpCode(HttpStatus.OK)
+  async delete(@Param('id') id: string) {
+    return await this.userService.delete(id);
+  }
+
+  @Delete('/truncate/:id')
+  @HttpCode(HttpStatus.OK)
+  async truncate(@Param('id') id: string) {
+    return await this.userService.truncate(id);
+  }
+
   @Get('/healthcheck')
+  @HttpCode(HttpStatus.OK)
   healthCheck() {
     return this.userService.healthCheck();
   }

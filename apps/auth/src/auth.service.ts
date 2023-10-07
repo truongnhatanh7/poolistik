@@ -35,6 +35,7 @@ export class AuthService {
     const newUser = new UserDomain();
     newUser.username = signUpDto.username;
     newUser.password = hashedPassword;
+    newUser.email = signUpDto.email;
     newUser.role = UserRole.User;
 
     const userEntity = this.userDataMapper.toOrmEntity(newUser);

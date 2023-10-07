@@ -9,6 +9,6 @@ async function bootstrap() {
   if (process.env.STAGE !== 'prod') {
     swaggerConfiguration(app, 'auth');
   }
-  await app.listen(3001);
+  await app.listen(process.env.AUTH_SERVICE_PORT);
 }
 bootstrap();
