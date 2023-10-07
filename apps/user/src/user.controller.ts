@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Put,
   Query,
 } from '@nestjs/common';
@@ -18,7 +19,7 @@ export class UserController {
 
   @Get('/find/:id')
   @HttpCode(HttpStatus.OK)
-  async find(@Param('id') id: string) {
+  async find(@Param('id', ParseUUIDPipe) id: string) {
     return await this.userService.find(id);
   }
 
