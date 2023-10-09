@@ -1,6 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -14,6 +15,8 @@ import { UserDomain } from 'apps/user/src/entities/user.domain';
 import { Reflector } from '@nestjs/core';
 import { UserRole } from '../role/role.enum';
 import { ROLES_KEY } from '../decorators/role.decorator';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -22,6 +25,7 @@ export class AuthGuard implements CanActivate {
     private jwtService: JwtService,
     private httpService: HttpService,
     private reflector: Reflector,
+    @Inject(CACHE_MANAGER) private cacheService: Cache,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -89,16 +93,35 @@ export class AuthGuard implements CanActivate {
     const userId: string = payload.payload.userId;
     const sessionToken = payload.sessionToken;
 
+    // Check cache
+    const cachedSessionToken = await this.cacheService.get(
+      `session_token_${userId}`,
+    );
+
+    if (cachedSessionToken && cachedSessionToken === sessionToken) {
+      return;
+    }
+
+    if (cachedSessionToken && cachedSessionToken !== sessionToken) {
+      throw new UnauthorizedException();
+    }
+
     const getUserApi = `${this.configService.get<string>(
       'USER_SERVICE_ENDPOINT',
     )}/api/find/${userId}`;
 
-    await lastValueFrom(this.httpService.get<UserDomain>(getUserApi)).then(
-      (data) => {
-        if (data.data.sessionToken !== sessionToken) {
-          throw new UnauthorizedException();
-        }
-      },
+    const res = await lastValueFrom(
+      this.httpService.get<UserDomain>(getUserApi),
+    );
+
+    if (res.data.sessionToken !== sessionToken) {
+      throw new UnauthorizedException();
+    }
+
+    await this.cacheService.set(
+      `session_token_${res.data.id}`,
+      res.data.sessionToken,
+      60, // TTL 60 seconds
     );
   }
 }

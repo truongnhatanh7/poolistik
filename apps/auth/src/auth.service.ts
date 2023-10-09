@@ -7,16 +7,16 @@ import { UpdateUserDto } from 'apps/user/src/dto/update.dto';
 import { UserDomain } from 'apps/user/src/entities/user.domain';
 import { UserEntity } from 'apps/user/src/entities/user.entity';
 import { UserDataMapper } from 'apps/user/src/entities/user.mapper';
+import { AxiosError } from 'axios';
 import * as bcrypt from 'bcrypt';
+import { RefreshTokenDto } from 'infrastructure/auth/dto/refresh-token.dto';
+import { ReturnToken } from 'infrastructure/auth/dto/return-token.dto';
+import { UserRole } from 'infrastructure/auth/role/role.enum';
 import { catchError, lastValueFrom } from 'rxjs';
 import { Repository } from 'typeorm';
 import { AccessTokenDto } from '../../../infrastructure/auth/dto/access-token.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { AxiosError } from 'axios';
-import { ReturnToken } from 'infrastructure/auth/dto/return-token.dto';
-import { RefreshTokenDto } from 'infrastructure/auth/dto/refresh-token.dto';
-import { UserRole } from 'infrastructure/auth/role/role.enum';
 
 @Injectable()
 export class AuthService {

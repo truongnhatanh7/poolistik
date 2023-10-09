@@ -1,11 +1,9 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from 'infrastructure/auth/guard/auth.guard';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
-import { AuthGuard } from 'infrastructure/auth/guard/auth.guard';
-import { Roles } from 'infrastructure/auth/decorators/role.decorator';
-import { UserRole } from 'infrastructure/auth/role/role.enum';
 
 @Controller('/api')
 export class AuthController {
@@ -38,7 +36,6 @@ export class AuthController {
 
   @Get('/guard-test')
   @ApiBearerAuth()
-  @Roles(UserRole.Admin)
   @UseGuards(AuthGuard)
   guardTest() {
     return true;
