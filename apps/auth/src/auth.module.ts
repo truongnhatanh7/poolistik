@@ -21,13 +21,15 @@ import * as redisStore from 'cache-manager-redis-store';
       timeout: 5000,
       maxRedirects: 5,
     }),
-    CacheModule.register({
-      isGlobal: true,
-      store: redisStore,
-      url: process.env.KV_URL,
-      tls: true,
-      // host: process.env.ELASTICACHE_HOST,
-      // port: process.env.ELASTICACHE_PORT,
+    CacheModule.registerAsync({
+      imports: [CustomConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        isGlobal: true,
+        store: redisStore,
+        url: configService.get<string>('KV_URL'),
+        tls: true,
+      }),
+      inject: [ConfigService],
     }),
   ],
   controllers: [AuthController],
