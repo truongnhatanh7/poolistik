@@ -28,6 +28,7 @@ import * as redisStore from 'cache-manager-redis-store';
         store: redisStore,
         url: configService.get<string>('KV_URL'),
         tls: true,
+        ttl: 3600, // 1 Hour
       }),
       inject: [ConfigService],
     }),

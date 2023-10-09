@@ -121,7 +121,6 @@ export class AuthGuard implements CanActivate {
     await this.cacheService.set(
       `session_token_${res.data.id}`,
       res.data.sessionToken,
-      60, // TTL 60 seconds
     );
   }
 }
