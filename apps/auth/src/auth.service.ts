@@ -12,11 +12,13 @@ import * as bcrypt from 'bcrypt';
 import { RefreshTokenDto } from 'infrastructure/auth/dto/refresh-token.dto';
 import { ReturnToken } from 'infrastructure/auth/dto/return-token.dto';
 import { UserRole } from 'infrastructure/auth/role/role.enum';
+import { NodeMailerService } from 'infrastructure/mail/mail.service';
 import { catchError, lastValueFrom } from 'rxjs';
 import { Repository } from 'typeorm';
 import { AccessTokenDto } from '../../../infrastructure/auth/dto/access-token.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
+import Mail from 'nodemailer/lib/mailer';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +29,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private httpService: HttpService,
+    private mailService: NodeMailerService,
   ) {
     this.userDataMapper = new UserDataMapper();
   }
@@ -166,5 +169,22 @@ export class AuthService {
     );
     // return token
     return returnTokens;
+  }
+
+  async forgotPassword(id: string) {
+    const user = await this.userRepo.findOneBy({
+      id: id,
+    });
+
+    if (!user) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
+
+    const mailOptions: Mail.Options = {
+      to: user.email,
+      subject: 'Reset Password',
+      text: `Use this link to reset your password `,
+    };
+    await this.mailService.send(mailOptions);
   }
 }

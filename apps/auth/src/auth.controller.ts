@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from 'infrastructure/auth/guard/auth.guard';
 import { AuthService } from './auth.service';
@@ -39,5 +48,10 @@ export class AuthController {
   @UseGuards(AuthGuard)
   guardTest() {
     return true;
+  }
+
+  @Put('/forgot-password/:id')
+  async forgotPassword(@Param('id') id: string) {
+    return await this.authService.forgotPassword();
   }
 }

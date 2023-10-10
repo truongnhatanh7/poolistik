@@ -10,6 +10,8 @@ import { PostgresModule } from 'infrastructure/database/postgres.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import * as redisStore from 'cache-manager-redis-store';
+import { NodeMailerModule } from 'infrastructure/mail/mail.module';
+import { NodeMailerService } from 'infrastructure/mail/mail.service';
 
 @Module({
   imports: [
@@ -32,8 +34,20 @@ import * as redisStore from 'cache-manager-redis-store';
       }),
       inject: [ConfigService],
     }),
+    NodeMailerModule.register({
+      service: process.env.GCP_MAIL_SERVICE,
+      transport: {
+        auth: {
+          type: process.env.GCP_AUTH_TYPE,
+          user: process.env.GCP_EMAIL_ADDR,
+          clientId: process.env.GCP_OAUTH_CLIENTID,
+          clientSecret: process.env.GCP_OAUTH_SECRET,
+          refresh_token: process.env.GCP_REFRESH_TOKEN,
+        },
+      },
+    }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, ConfigService],
+  providers: [AuthService, ConfigService, NodeMailerService],
 })
 export class AuthModule {}
