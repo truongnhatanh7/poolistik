@@ -13,6 +13,7 @@ import { AuthGuard } from 'infrastructure/auth/guard/auth.guard';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
+import { ResetPasswordReqDto } from './dto/reset-password.req.dto';
 
 @Controller('/api')
 export class AuthController {
@@ -52,6 +53,14 @@ export class AuthController {
 
   @Put('/forgot-password/:id')
   async forgotPassword(@Param('id') id: string) {
-    return await this.authService.forgotPassword();
+    return await this.authService.forgotPassword(id);
+  }
+
+  @Put('/reset-password/:id')
+  async resetPassword(
+    @Param('id') id: string,
+    @Body() resetPasswordDto: ResetPasswordReqDto,
+  ) {
+    return await this.authService.resetPassword(id, resetPasswordDto);
   }
 }

@@ -15,8 +15,9 @@ NestJS
 - Payload validation using pipe
 - Soft delete
 - Redis for session token -> Reduce latency
-## TODO
+- Gmail Boilerplate
 - Reset password by email
+## TODO
 - CRUD Poolhall
 - Implement pool table booking
 - Implement Kafka Boilerplate

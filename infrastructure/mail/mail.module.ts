@@ -2,7 +2,7 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { NodeMailerOptions } from './options.interface';
 import { NodeMailerService } from './mail.service';
 import { MAIL_OPTIONS_TOKEN } from './mail.constants';
-
+// TODO: refactor
 @Module({
   providers: [NodeMailerService],
   exports: [NodeMailerService, MAIL_OPTIONS_TOKEN],

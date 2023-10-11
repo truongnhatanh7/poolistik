@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,7 +18,12 @@ import { Repository } from 'typeorm';
 import { AccessTokenDto } from '../../../infrastructure/auth/dto/access-token.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
+import { Cache } from 'cache-manager';
 import Mail from 'nodemailer/lib/mailer';
+import { ResetPasswordReqDto } from './dto/reset-password.req.dto';
+import { RESET_PREFIX } from './constants/caching';
+import { ResetPasswordResDto } from './dto/reset-password.res.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class AuthService {
@@ -30,6 +35,7 @@ export class AuthService {
     private configService: ConfigService,
     private httpService: HttpService,
     private mailService: NodeMailerService,
+    @Inject(CACHE_MANAGER) private cacheService: Cache,
   ) {
     this.userDataMapper = new UserDataMapper();
   }
@@ -171,7 +177,7 @@ export class AuthService {
     return returnTokens;
   }
 
-  async forgotPassword(id: string) {
+  async forgotPassword(id: string): Promise<ResetPasswordResDto> {
     const user = await this.userRepo.findOneBy({
       id: id,
     });
@@ -180,11 +186,50 @@ export class AuthService {
       throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
     }
 
+    // FE has to implement reset password form
     const mailOptions: Mail.Options = {
       to: user.email,
       subject: 'Reset Password',
-      text: `Use this link to reset your password `,
+      text: `Use this link to reset your password <link>`,
     };
     await this.mailService.send(mailOptions);
+
+    // Set temporary reset token to Redis
+    const resetToken = Math.floor(Math.random() * Date.now()).toString(36);
+    const hashResetToken = await bcrypt.hash(resetToken, 10);
+    await this.cacheService.set(
+      `${RESET_PREFIX}_${id}`,
+      hashResetToken,
+      60 * 3, // 3 minutes
+    );
+
+    return {
+      id: id,
+      resetToken: hashResetToken,
+    };
+  }
+
+  async resetPassword(id: string, resetPasswordDto: ResetPasswordReqDto) {
+    // Check valid token?, if valid, remove from Redis else throw err
+    const resetToken = await this.cacheService.get<string>(
+      `${RESET_PREFIX}_${id}`,
+    );
+
+    if (!bcrypt.compare(resetPasswordDto.resetToken, resetToken)) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
+
+    if (resetPasswordDto.newPassword !== resetPasswordDto.confirmNewPassword) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+    }
+
+    // Find user
+    const user = await this.userRepo.findOneBy({ id: id });
+    // Update user pwd
+    user.password = await bcrypt.hash(resetPasswordDto.newPassword, 10);
+    await this.userRepo.save(user);
+
+    // Remove reset token
+    await this.cacheService.del(`${RESET_PREFIX}_${id}`);
   }
 }

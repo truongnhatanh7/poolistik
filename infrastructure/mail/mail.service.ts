@@ -1,20 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { MAIL_OPTIONS_TOKEN } from './mail.constants';
 import { NodeMailerOptions } from './options.interface';
-// import { Transporter } from 'nodemailer';
+import { Transporter } from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const nodemailer = require('nodemailer');
 
 @Injectable()
 export class NodeMailerService {
-  private transporter: any;
+  private transporter: Transporter;
   constructor(@Inject(MAIL_OPTIONS_TOKEN) options: NodeMailerOptions) {
     this.transporter = nodemailer.createTransport({
-      // host: options.host,
-      service: 'gmail',
+      service: options.service,
       auth: {
-        type: 'OAuth2',
+        type: options.transport.auth.type,
         user: options.transport.auth.user,
         clientId: options.transport.auth.clientId,
         clientSecret: options.transport.auth.clientSecret,
