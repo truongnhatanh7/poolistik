@@ -44,7 +44,6 @@ import { AUTH_CONFIG } from './cfg/auth.config';
     NodeMailerModule.registerAsync({
       imports: [CustomConfigModule],
       useFactory: async (configService: ConfigService) => {
-        console.log(configService.get<string>(`${AUTH_CONFIG}.mail.service`));
         return {
           service: configService.get<string>(`${AUTH_CONFIG}.mail.service`),
           transport: {
