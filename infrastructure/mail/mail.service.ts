@@ -17,7 +17,7 @@ export class NodeMailerService {
         user: options.transport.auth.user,
         clientId: options.transport.auth.clientId,
         clientSecret: options.transport.auth.clientSecret,
-        refreshToken: options.transport.auth.refresh_token,
+        refreshToken: options.transport.auth.refreshToken,
       },
     });
   }

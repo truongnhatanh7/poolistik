@@ -41,17 +41,30 @@ import { AUTH_CONFIG } from './cfg/auth.config';
       }),
       inject: [ConfigService],
     }),
-    NodeMailerModule.register({
-      service: process.env.GCP_MAIL_SERVICE,
-      transport: {
-        auth: {
-          type: process.env.GCP_AUTH_TYPE,
-          user: process.env.GCP_EMAIL_ADDR,
-          clientId: process.env.GCP_OAUTH_CLIENTID,
-          clientSecret: process.env.GCP_OAUTH_SECRET,
-          refresh_token: process.env.GCP_REFRESH_TOKEN,
-        },
+    NodeMailerModule.registerAsync({
+      imports: [CustomConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        console.log(configService.get<string>(`${AUTH_CONFIG}.mail.service`));
+        return {
+          service: configService.get<string>(`${AUTH_CONFIG}.mail.service`),
+          transport: {
+            auth: {
+              type: configService.get<string>(`${AUTH_CONFIG}.mail.auth.type`),
+              user: configService.get<string>(`${AUTH_CONFIG}.mail.auth.user`),
+              clientId: configService.get<string>(
+                `${AUTH_CONFIG}.mail.auth.clientId`,
+              ),
+              clientSecret: configService.get<string>(
+                `${AUTH_CONFIG}.mail.auth.clientSecret`,
+              ),
+              refreshToken: configService.get<string>(
+                `${AUTH_CONFIG}.mail.auth.refreshToken`,
+              ),
+            },
+          },
+        };
       },
+      inject: [ConfigService],
     }),
   ],
   controllers: [AuthController],

@@ -23,7 +23,7 @@ export default () => ({
         user: process.env.GCP_EMAIL_ADDR,
         clientId: process.env.GCP_OAUTH_CLIENTID,
         clientSecret: process.env.GCP_OAUTH_SECRET,
-        refresh_token: process.env.GCP_REFRESH_TOKEN,
+        refreshToken: process.env.GCP_REFRESH_TOKEN,
       },
     },
   },

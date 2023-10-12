@@ -8,7 +8,7 @@ export interface NodeMailerOptions {
       user?: string;
       clientId?: string;
       clientSecret?: string;
-      refresh_token?: string;
+      refreshToken?: string;
       accessToken?: string;
     };
   };
