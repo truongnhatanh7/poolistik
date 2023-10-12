@@ -1,6 +1,6 @@
-export const POSTGRES_DB_CONFIG = 'POSTGRES_DB_CONFIG';
+export const USER_CONFIG = 'USER_CONFIG';
 export default () => ({
-  [POSTGRES_DB_CONFIG]: {
+  [USER_CONFIG]: {
     db: process.env.POSTGRES_DB,
     user: process.env.POSTGRES_PASSWORD,
     password: process.env.POSTGRES_PASSWORD,

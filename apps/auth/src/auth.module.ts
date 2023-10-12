@@ -4,14 +4,15 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from 'apps/user/src/entities/user.entity';
+import * as redisStore from 'cache-manager-redis-store';
 import { CustomJwtModule } from 'infrastructure/auth/jwt/jwt.module';
 import { CustomConfigModule } from 'infrastructure/config/config.module';
 import { PostgresModule } from 'infrastructure/database/postgres.module';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import * as redisStore from 'cache-manager-redis-store';
 import { NodeMailerModule } from 'infrastructure/mail/mail.module';
 import { NodeMailerService } from 'infrastructure/mail/mail.service';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { AUTH_CONFIG } from './cfg/auth.config';
 
 @Module({
   imports: [
@@ -19,18 +20,24 @@ import { NodeMailerService } from 'infrastructure/mail/mail.service';
     PostgresModule,
     TypeOrmModule.forFeature([UserEntity]),
     CustomJwtModule,
-    HttpModule.register({
-      timeout: 5000,
-      maxRedirects: 5,
+    HttpModule.registerAsync({
+      imports: [CustomConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        timeout: configService.get<number>(`${AUTH_CONFIG}.http.timeout`),
+        maxRedirects: configService.get<number>(
+          `${AUTH_CONFIG}.http.maxRedirects`,
+        ),
+      }),
+      inject: [ConfigService],
     }),
     CacheModule.registerAsync({
       imports: [CustomConfigModule],
       useFactory: async (configService: ConfigService) => ({
         isGlobal: true,
         store: redisStore,
-        url: configService.get<string>('KV_URL'),
-        tls: true,
-        ttl: 3600, // 1 Hour
+        url: configService.get<string>(`${AUTH_CONFIG}.redis.kv_url`),
+        tls: configService.get<boolean>(`${AUTH_CONFIG}.redis.tls`),
+        ttl: configService.get<number>(`${AUTH_CONFIG}.redis.ttl`), // 1 Hour
       }),
       inject: [ConfigService],
     }),
